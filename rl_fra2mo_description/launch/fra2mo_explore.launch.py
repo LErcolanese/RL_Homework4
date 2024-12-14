@@ -55,6 +55,6 @@ def generate_launch_description():
             declare_use_sim_time_cmd,
             slam_launch,
             nav2_bringup_launch,
-            explore_lite_launch,
+            # explore_lite_launch,
         ]
     )

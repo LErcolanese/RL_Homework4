@@ -66,7 +66,7 @@
 
     <include>
       <name>obstacle_09</name>
-      <pose> 5 5 0.1 0 0 3.14159</pose>
+      <pose> -3 -3.3 0.1 0 0 1.57</pose>
       <uri>model://obstacle_09</uri>
     </include>
 

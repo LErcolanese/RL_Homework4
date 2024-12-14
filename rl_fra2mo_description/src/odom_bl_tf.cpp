@@ -49,6 +49,23 @@ private:
         // Invia la trasformazione
         tf_broadcaster_->sendTransform(transform_stamped);
 
+                // Creazione e pubblicazione della trasformazione dinamica
+        transform_stamped.header.stamp = this->now();
+        transform_stamped.header.frame_id = "fra2mo/odom";
+        transform_stamped.child_frame_id = "odom";
+
+        transform_stamped.transform.translation.x = x;
+        transform_stamped.transform.translation.y = y;
+        transform_stamped.transform.translation.z = 0.0;
+        transform_stamped.transform.rotation.x = q.x();
+        transform_stamped.transform.rotation.y = q.y();
+        transform_stamped.transform.rotation.z = q.z();
+        transform_stamped.transform.rotation.w = q.w();
+
+        tf_broadcaster_->sendTransform(transform_stamped);
+
+
+
         // Log per debug (facoltativo)
         RCLCPP_DEBUG(this->get_logger(),
                      "Published transform: [frame: fra2mo/odom -> base_footprint] [x: %.2f, y: %.2f, yaw: %.2f]",

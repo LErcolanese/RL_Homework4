@@ -57,7 +57,9 @@ def generate_launch_description():
             launch_arguments={'gz_args': LaunchConfiguration('gz_args')}.items()
     )
 
-    position = [0.0, 0.0, 0.100]
+    position = [-3.0, 3.5, 0.100]
+    orientation = [0.0, 0.0, -1.57]
+
 
     # Define a Node to spawn the robot in the Gazebo simulation
     gz_spawn_entity = Node(
@@ -69,7 +71,11 @@ def generate_launch_description():
                    '-allow_renaming', 'true',
                     "-x", str(position[0]),
                     "-y", str(position[1]),
-                    "-z", str(position[2]),]
+                    "-z", str(position[2]),
+                    "-R", str(orientation[0]),
+                    "-P", str(orientation[1]),
+                    "-Y", str(orientation[2]),]
+                
     )
 
     bridge = Node(
