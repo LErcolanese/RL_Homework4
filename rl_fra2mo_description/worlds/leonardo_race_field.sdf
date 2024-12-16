@@ -64,6 +64,7 @@
       <uri>model://obstacle_03</uri>
     </include>
 
+     <!-- 1b.-->
     <include>
       <name>obstacle_09</name>
       <pose> -3 -3.3 0.1 0 0 1.57</pose>
@@ -100,7 +101,7 @@
       <pose> -8 0.5 0.1 0 0 0</pose>
       <uri>model://unknown_obst_3</uri>
     </include> 
-
+   
     <!--<include>
       <name>unknown_tunnel_1 </name> 
       <pose> -3.2 -1.5 0.1 0 0 2.355 </pose>
@@ -112,6 +113,18 @@
       <pose> -2 3.5 0.1 0 0 -1.57 </pose>
       <uri>model://unknown_tunnel_2</uri>
     </include>-->
+
+    <!-- 1c -->
+     <include>
+      <uri>
+        model://marker_115
+      </uri>
+      <name>arucotag</name>
+      <pose>-3.60 -0.69 0.36 2.00 1.53 -2.57</pose>
+    </include>
+
+
+
 
     <include>
       <name>start_pod </name> <!--low tower-->
@@ -187,4 +200,3 @@
   
   </world>
 </sdf>
-
