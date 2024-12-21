@@ -17,6 +17,22 @@ def generate_launch_description():
         description='Full path to the ROS2 parameters file to use for the slam_toolbox node',
     )
 
+    slam_params_file_arg_medium = DeclareLaunchArgument(
+        'slam_params_file',
+        default_value=PathJoinSubstitution(
+            [FindPackageShare("rl_fra2mo_description"), 'config', 'slam_medium_values.yaml']
+        ),
+        description='Full path to the ROS2 parameters file to use for the slam_toolbox node',
+    )
+
+    slam_params_file_arg_high = DeclareLaunchArgument(
+        'slam_params_file',
+        default_value=PathJoinSubstitution(
+            [FindPackageShare("rl_fra2mo_description"), 'config', 'slam_high_values.yaml']
+        ),
+        description='Full path to the ROS2 parameters file to use for the slam_toolbox node',
+    )
+
     use_sim_time_arg = DeclareLaunchArgument(
         'use_sim_time', default_value='true', description='Use simulation/Gazebo clock'
     )

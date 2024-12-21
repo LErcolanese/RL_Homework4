@@ -10,6 +10,8 @@ from ament_index_python.packages import get_package_share_directory
 from tf2_ros import Buffer, TransformListener
 from tf2_ros import TransformException
 from rclpy.duration import Duration
+from geometry_msgs.msg import TransformStamped, PoseStamped
+from tf2_ros import StaticTransformBroadcaster
 
 # Carica i waypoints da YAML
 waypoints = yaml.safe_load(
@@ -26,10 +28,25 @@ class ArucoNavigationNode(Node):
     def __init__(self):
         super().__init__('aruco_navigation_node')
         self.navigator = BasicNavigator()
-        self.tf_buffer = Buffer()
-        self.tf_listener = TransformListener(self.tf_buffer, self)
-        self.aruco_sub = self.create_subscription(PoseStamped, '/aruco_single/pose', self.aruco_callback, 10)
+        #self.tf_buffer = Buffer()
+        #self.tf_listener = TransformListener(self.tf_buffer, self)
+       # self.aruco_sub = self.create_subscription(PoseStamped, '/aruco_single/pose', self.aruco_callback, 10)
         self.current_marker_pose = None
+        self.map_offset_x = -3.0
+        self.map_offset_y = 3.5
+
+        # Inizializza il broadcaster TF statico
+        self.tf_broadcaster = StaticTransformBroadcaster(self)
+
+        # Sottoscrizione al topic della posa dell'ArUco
+        self.aruco_pose_sub = self.create_subscription(
+            PoseStamped,
+            '/aruco_single/pose',
+            self.aruco_pose_callback,
+            10
+        )
+
+        self.get_logger().info("Aruco Static TF publisher initialized.")
 
     def start_navigation(self):
         # Inizializza il navigator
@@ -65,43 +82,103 @@ class ArucoNavigationNode(Node):
 
         # Log della posa del marker ArUco nel frame "map"
         self.get_logger().info(f"ArUco marker position in map frame: "
-                               f"Position -> [x: {self.current_marker_pose.pose.position.x}, "
-                               f"y: {self.current_marker_pose.pose.position.y}, z: {self.current_marker_pose.pose.position.z}], "
-                               f"Orientation -> [x: {self.current_marker_pose.pose.orientation.x}, "
-                               f"y: {self.current_marker_pose.pose.orientation.y}, "
-                               f"z: {self.current_marker_pose.pose.orientation.z}, "
-                               f"w: {self.current_marker_pose.pose.orientation.w}]")
+                            #    f"Position -> [x: {self.current_marker_pose.pose.position.x}, "
+                            #    f"y: {self.current_marker_pose.pose.position.y}, z: {self.current_marker_pose.pose.position.z}], "
+                            #    f"Orientation -> [x: {self.current_marker_pose.pose.orientation.x}, "
+                            #    f"y: {self.current_marker_pose.pose.orientation.y}, "
+                            #    f"z: {self.current_marker_pose.pose.orientation.z}, "
+                            #    f"w: {self.current_marker_pose.pose.orientation.w}]")
+                             f"Position -> [x: {self.current_marker_pose.transform.translation.x}, "
+                               f"y: {self.current_marker_pose.transform.translation.y}, z: {self.current_marker_pose.transform.translation.z}], "
+                               f"Orientation -> [x: {self.current_marker_pose.transform.rotation.x}, "
+                               f"y: {self.current_marker_pose.transform.rotation.y}, "
+                               f"z: {self.current_marker_pose.transform.rotation.z}, "
+                               f"w: {self.current_marker_pose.transform.rotation.w}]")
 
-    def aruco_callback(self, msg):
-        try:
-            # Trasformiamo la posizione e orientamento del marker ArUco nel frame "map"
-            transformed_pose = self.tf_buffer.transform(msg, "map", timeout=Duration(seconds=1.0))
+    def aruco_pose_callback(self, msg):
+        # try:
+        #     # Trasformiamo la posizione e orientamento del marker ArUco nel frame "map"
+        #     transformed_pose = self.tf_buffer.transform(msg, "map", timeout=Duration(seconds=1.0))
             
-            # Memorizza la posa trasformata
-            self.current_marker_pose = transformed_pose
+        #     # Memorizza la posa trasformata
 
-        except TransformException as e:
-            self.get_logger().error(f"Failed to transform ArUco marker pose: {e}")
+        # except TransformException as e:
+        #     self.get_logger().error(f"Failed to transform ArUco marker pose: {e}")
+         # Legge la posizione e l'orientamento del marker ArUco
+        aruco_x = msg.pose.position.x
+        aruco_y = msg.pose.position.y
+        aruco_z = msg.pose.position.z
+
+        qx = msg.pose.orientation.x
+        qy = msg.pose.orientation.y
+        qz = msg.pose.orientation.z
+        qw = msg.pose.orientation.w
+
+        # Applica l'offset iniziale al frame map
+        map_x = aruco_x + self.map_offset_x
+        map_y = aruco_y + self.map_offset_y
+        map_z = aruco_z
+
+        # Creazione e pubblicazione della trasformazione statica
+        transform_stamped = TransformStamped()
+        transform_stamped.header.stamp = self.get_clock().now().to_msg()
+        transform_stamped.header.frame_id = 'aruco_marker_frame'
+        transform_stamped.child_frame_id = 'map'
+
+        transform_stamped.transform.translation.x = map_x
+        transform_stamped.transform.translation.y = map_y
+        transform_stamped.transform.translation.z = map_z
+        transform_stamped.transform.rotation.x = qx
+        transform_stamped.transform.rotation.y = qy
+        transform_stamped.transform.rotation.z = qz
+        transform_stamped.transform.rotation.w = qw
+
+        # Pubblica la trasformazione statica
+        self.tf_broadcaster.sendTransform(transform_stamped)
+        self.current_marker_pose = transform_stamped
+
+
+        # Log per debug
+        self.get_logger().debug(
+            f"Published static transform: [frame: aruco_marker_frame -> map] "
+            f"[x: {map_x:.2f}, y: {map_y:.2f}, z: {map_z:.2f}]"
+        )
+
 
     def return_to_initial_position(self):
-        # Recupera la posizione iniziale dal file YAML
-        initial_position = initial_pose['pose']
-        initial_goal = PoseStamped()
-        initial_goal.pose.position.x = initial_position['position']['x']
-        initial_goal.pose.position.y = initial_position['position']['y']
-        initial_goal.pose.position.z = initial_position['position']['z']
-        initial_goal.pose.orientation.x = initial_position['orientation']['x']
-        initial_goal.pose.orientation.y = initial_position['orientation']['y']
-        initial_goal.pose.orientation.z = initial_position['orientation']['z']
-        initial_goal.pose.orientation.w = initial_position['orientation']['w']
+                
+        # Recupera la posa iniziale dal file YAML
 
-        # Naviga verso la posizione iniziale
-        self.navigator.goToPose(initial_goal)
+        initial_position = initial_pose.get("initial_pose", None)
+        if not initial_position:
 
+            self.get_logger().error("Initial pose not defined in initial_pose.yaml.")
+            return# Crea una singola posa di destinazione
+
+        goal_pose = self.create_pose(initial_position)
+        
+            # Naviga verso la posa iniziale
+
+        self.navigator.goToPose(goal_pose)
+        
+            # Attendi il completamento della navigazione
         while not self.navigator.isTaskComplete():
+
             feedback = self.navigator.getFeedback()
             if feedback:
-                print(f"Returning to initial position: waypoint {feedback.current_waypoint + 1}")
+                print(f"Returning to initial position: Distance remaining: {feedback.distance_remaining:.2f} meters.")
+            
+                # Verifica il risultato della navigazione
+
+        result = self.navigator.getResult()
+        if result == TaskResult.SUCCEEDED:
+
+                self.get_logger().info("Successfully returned to the initial position.")
+        else:
+
+                self.get_logger().error("Failed to return to the initial position.")
+        
+
 
     def create_pose(self, transform):
         initial_translation = {"x": -3, "y": 3.5}
@@ -145,7 +222,7 @@ class ArucoNavigationNode(Node):
         pose.pose.orientation.w = odom_orientation["w"]
 
         return pose
-
+    
 
 def main():
     rclpy.init()

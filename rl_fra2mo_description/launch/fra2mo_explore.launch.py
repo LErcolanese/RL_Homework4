@@ -15,9 +15,21 @@ def generate_launch_description():
     params_file = LaunchConfiguration('params_file')
     use_sim_time = LaunchConfiguration('use_sim_time')
 
+    declare_params_file_cmd_law = DeclareLaunchArgument(
+        'params_file',
+        default_value=PathJoinSubstitution([fra2mo_dir, 'config', 'explore_law_values.yaml']),
+        description='Full path to the ROS2 parameters file to use for all launched nodes',
+    )
+
     declare_params_file_cmd = DeclareLaunchArgument(
         'params_file',
         default_value=PathJoinSubstitution([fra2mo_dir, 'config', 'explore.yaml']),
+        description='Full path to the ROS2 parameters file to use for all launched nodes',
+    )
+
+    declare_params_file_cmd_high = DeclareLaunchArgument(
+        'params_file',
+        default_value=PathJoinSubstitution([fra2mo_dir, 'config', 'explore_high_values.yaml']),
         description='Full path to the ROS2 parameters file to use for all launched nodes',
     )
 
