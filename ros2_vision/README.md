@@ -71,7 +71,7 @@ and select as topic: aruco_single/result.
  
 In another terminal run:
 ```
-ros2 run rl_fra2mo_description aruco_tf_publisher
+ros2 run rl_fra2mo_description aruco_to_map
 ```
 In the last terminal, to see the transformation published by the node, run:
 ```
