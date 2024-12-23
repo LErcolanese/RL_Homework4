@@ -1,5 +1,5 @@
-Homework3_rl2024
-Homework 3 for Robotics Lab 2024/2025
+Homework4_rl2024
+Homework 4 for Robotics Lab 2024/2025
 
 First build all the packages by using:
 
@@ -75,7 +75,7 @@ ros2 run rl_fra2mo_description aruco_to_map
 ```
 In the last terminal, to see the transformation published by the node, run:
 ```
-ros2 topic echo /tf
+ros2 topic echo /aruco_to_map
 ```
  
 NOTES:
