@@ -43,21 +43,21 @@ ros2 launch rl_fra2mo_description rviz_gazebo.launch.py
 ```
 By defualt, if you run:
 ```
-ros2 launch rl_fra2mo_description fra2mo_explore.launch.py 
+ros2 launch rl_fra2mo_description fra2mo_explore_pt3.launch.py 
 ```
 will be selected low values for the slam parameters and medium values for the explore parameters.
 
 If you want change the configurations, run:
 ```
-ros2 launch rl_fra2mo_description fra2mo_explore.launch.py slam_config_type:="medium" explore_config_type:="low"
+ros2 launch rl_fra2mo_description fra2mo_explore_pt3.launch.py slam_config_type:="medium" explore_config_type:="low"
 ```
 This command selects medium values for the slam parameters and low values for the explore parameters.
 ```
-ros2 launch rl_fra2mo_description fra2mo_explore.launch.py slam_config_type:="high" explore_config_type:="default"
+ros2 launch rl_fra2mo_description fra2mo_explore_pt3.launch.py slam_config_type:="high" explore_config_type:="default"
 ```
 This command selects high values for the slam parameters and medium values for the explore parameters.
 ```
-ros2 launch rl_fra2mo_description fra2mo_explore.launch.py slam_config_type:="high" explore_config_type:="high"
+ros2 launch rl_fra2mo_description fra2mo_explore_pt3.launch.py slam_config_type:="high" explore_config_type:="high"
 ```
 This command selects high values for the slam parameters and high values for the explore parameters.
 
